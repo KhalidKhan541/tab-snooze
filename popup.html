@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TabSnooze</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <img src="icons/icon48.png" alt="TabSnooze" class="logo">
+        <h1>TabSnooze</h1>
+      </div>
+      <div class="header-right">
+        <span id="snoozedCount" class="badge" title="Snoozed tabs">0</span>
+        <button id="settingsBtn" class="icon-btn" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="snoozed">Snoozed</button>
+      <button class="tab-btn" data-tab="settings">Settings</button>
+      <button class="tab-btn" data-tab="stats">Stats</button>
+    </nav>
+
+    <!-- Dashboard Tab -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <div class="section">
+        <h2>Quick Snooze</h2>
+        <div class="current-tab-card" id="currentTabCard">
+          <img id="currentTabFavicon" class="favicon" src="" alt="">
+          <div class="current-tab-info">
+            <span id="currentTabTitle" class="tab-title">No tab selected</span>
+            <span id="currentTabUrl" class="tab-url"></span>
+          </div>
+        </div>
+        <div class="quick-actions">
+          <button class="action-btn" data-snooze="30">30 min</button>
+          <button class="action-btn" data-snooze="60">1 hr</button>
+          <button class="action-btn" data-snooze="180">3 hr</button>
+          <button class="action-btn" data-snooze="tomorrow">Tomorrow</button>
+          <button class="action-btn" data-snooze="nextweek">Next week</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Bulk Actions</h2>
+        <div class="bulk-actions">
+          <button id="snoozeAllInactive" class="bulk-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Snooze All Inactive
+          </button>
+          <button id="snoozeExceptCurrent" class="bulk-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+            Snooze All Except Current
+          </button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Recently Snoozed</h2>
+        <div id="recentSnoozed" class="snoozed-list">
+          <p class="empty-state">No snoozed tabs yet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Snoozed Tab -->
+    <div id="tab-snoozed" class="tab-panel">
+      <div class="section">
+        <div class="section-header">
+          <h2>Snoozed Tabs</h2>
+          <button id="restoreAllBtn" class="text-btn">Restore All</button>
+        </div>
+        <div id="snoozedList" class="snoozed-list">
+          <p class="empty-state">No snoozed tabs</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tab-settings" class="tab-panel">
+      <div class="section">
+        <h2>Auto-Snooze</h2>
+        <div class="setting-row">
+          <label for="autoSnoozeToggle">Enable auto-snooze</label>
+          <label class="toggle">
+            <input type="checkbox" id="autoSnoozeToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <label for="inactivityTimeout">Inactivity timeout</label>
+          <select id="inactivityTimeout">
+            <option value="5">5 minutes</option>
+            <option value="15" selected>15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">1 hour</option>
+            <option value="120">2 hours</option>
+            <option value="custom">Custom...</option>
+          </select>
+        </div>
+        <div id="customTimeoutRow" class="setting-row hidden">
+          <label for="customTimeout">Custom (minutes)</label>
+          <input type="number" id="customTimeout" min="1" max="1440" value="20" class="num-input">
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Smart Snooze</h2>
+        <div class="setting-row">
+          <label for="skipAudio">Don't snooze playing audio</label>
+          <label class="toggle">
+            <input type="checkbox" id="skipAudio" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <label for="skipPinned">Don't snooze pinned tabs</label>
+          <label class="toggle">
+            <input type="checkbox" id="skipPinned" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <label for="skipFormData">Don't snooze tabs with form data</label>
+          <label class="toggle">
+            <input type="checkbox" id="skipFormData" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Whitelist</h2>
+        <p class="section-desc">Sites that never get auto-snoozed</p>
+        <div class="whitelist-input-row">
+          <input type="text" id="whitelistInput" placeholder="e.g. google.com, *.youtube.com" class="text-input">
+          <button id="addWhitelistBtn" class="icon-btn-primary">+</button>
+        </div>
+        <div id="whitelistPresets" class="preset-chips">
+          <button class="chip" data-domain="docs.google.com">Google Docs</button>
+          <button class="chip" data-domain="spotify.com">Spotify</button>
+          <button class="chip" data-domain="youtube.com">YouTube</button>
+          <button class="chip" data-domain="meet.google.com">Google Meet</button>
+          <button class="chip" data-domain="zoom.us">Zoom</button>
+          <button class="chip" data-domain="teams.microsoft.com">Teams</button>
+        </div>
+        <div id="whitelistItems" class="whitelist-list"></div>
+        <div class="whitelist-actions">
+          <button id="exportWhitelist" class="text-btn">Export</button>
+          <button id="importWhitelist" class="text-btn">Import</button>
+          <input type="file" id="importWhitelistFile" accept=".json" class="hidden">
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Time-Based Rules</h2>
+        <div class="setting-row">
+          <label for="workHoursEnabled">Disable during work hours</label>
+          <label class="toggle">
+            <input type="checkbox" id="workHoursEnabled">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div id="workHoursRow" class="setting-row hidden">
+          <label>Work hours</label>
+          <div class="time-range">
+            <input type="time" id="workStart" value="09:00" class="time-input">
+            <span>to</span>
+            <input type="time" id="workEnd" value="17:00" class="time-input">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Tab -->
+    <div id="tab-stats" class="tab-panel">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-value" id="statMemorySaved">0 MB</span>
+          <span class="stat-label">Memory Saved (est.)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statTabsToday">0</span>
+          <span class="stat-label">Tabs Snoozed Today</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statTabsAllTime">0</span>
+          <span class="stat-label">Tabs Snoozed All Time</span>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Most Snoozed Sites</h2>
+        <div id="topSites" class="top-sites-list">
+          <p class="empty-state">No data yet</p>
+        </div>
+      </div>
+      <div class="section">
+        <button id="resetStats" class="text-btn danger">Reset Statistics</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="whitelist.js"></script>
+  <script src="tab-manager.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
